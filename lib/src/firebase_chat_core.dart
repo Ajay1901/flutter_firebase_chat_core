@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'firebase_chat_core_config.dart';
+import 'package:ntp/ntp.dart';
 import 'util.dart';
 
 /// Provides access to Firebase chat data. Singleton, use
@@ -297,7 +298,7 @@ class FirebaseChatCore {
             .orderBy('updatedAt', descending: true)
         : getFirebaseFirestore()
             .collection(config.roomsCollectionName)
-            .where('userIds', arrayContains: fu.uid);
+            .where('userIds', arrayContains: fu.uid).orderBy('lastUpdated', descending: true);
 
     return collection.snapshots().asyncMap(
           (query) => processRoomsQuery(
@@ -312,7 +313,7 @@ class FirebaseChatCore {
   /// Sends a message to the Firestore. Accepts any partial message and a
   /// room ID. If arbitraty data is provided in the [partialMessage]
   /// does nothing.
-  void sendMessage(dynamic partialMessage, String roomId) async {
+  void sendMessage(dynamic partialMessage, String roomId, Map<String, dynamic>? statusMap) async {
     if (firebaseUser == null) return;
 
     types.Message? message;
@@ -345,10 +346,17 @@ class FirebaseChatCore {
 
     if (message != null) {
       final messageMap = message.toJson();
+      if (statusMap != null) {
+        /// if group room, we'll set status to a uid mapping.
+        messageMap['groupStatus'] = statusMap;
+      }
       messageMap.removeWhere((key, value) => key == 'author' || key == 'id');
       messageMap['authorId'] = firebaseUser!.uid;
       messageMap['createdAt'] = FieldValue.serverTimestamp();
       messageMap['updatedAt'] = FieldValue.serverTimestamp();
+
+      final date = await NTP.now();
+      messageMap['timestamp'] = Timestamp.fromDate(date);
 
       await getFirebaseFirestore()
           .collection('${config.roomsCollectionName}/$roomId/messages')
