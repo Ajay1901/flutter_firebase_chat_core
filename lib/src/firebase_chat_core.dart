@@ -167,7 +167,7 @@ class FirebaseChatCore {
         .set({
       'createdAt': FieldValue.serverTimestamp(),
       'firstName': user.firstName,
-      'imageUrl': user.imageUrl,
+      'avatarUrl': user.imageUrl,
       'lastName': user.lastName,
       'lastSeen': user.lastSeen,
       'metadata': user.metadata,

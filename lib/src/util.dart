@@ -94,7 +94,7 @@ Future<types.Room> processRoomDocument(
         (u) => u['id'] != firebaseUser.uid,
       );
 
-      imageUrl = otherUser['imageUrl'] as String?;
+      imageUrl = otherUser['avatarUrl'] as String?;
       name = '${otherUser['firstName'] ?? ''} ${otherUser['lastName'] ?? ''}'
           .trim();
     } catch (e) {
