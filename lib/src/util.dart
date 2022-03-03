@@ -127,3 +127,18 @@ Future<types.Room> processRoomDocument(
 
   return types.Room.fromJson(data);
 }
+
+types.User processUserDocument(Map<String, dynamic> doc) {
+  final avatarUrl = doc['avatarUrl'] as String?;
+  final firstName = doc['firstName'] as String?;
+  final lastName = doc['lastName'] as String?;
+
+  final user = types.User(
+    imageUrl: avatarUrl,
+    firstName: firstName,
+    id: doc['id'] as String,
+    lastName: lastName,
+  );
+
+  return user;
+}

@@ -64,7 +64,7 @@ class FirebaseChatCore {
       config.usersCollectionName,
     );
 
-    final roomUsers = [types.User.fromJson(currentUser)] + users;
+    final roomUsers = [processUserDocument(currentUser)] + users;
 
     final room = await getFirebaseFirestore()
         .collection(config.roomsCollectionName)
@@ -135,7 +135,7 @@ class FirebaseChatCore {
       config.usersCollectionName,
     );
 
-    final users = [types.User.fromJson(currentUser), otherUser];
+    final users = [processUserDocument(currentUser), otherUser];
 
     final room = await getFirebaseFirestore()
         .collection(config.roomsCollectionName)
@@ -298,7 +298,8 @@ class FirebaseChatCore {
             .orderBy('updatedAt', descending: true)
         : getFirebaseFirestore()
             .collection(config.roomsCollectionName)
-            .where('userIds', arrayContains: fu.uid).orderBy('lastUpdated', descending: true);
+            .where('userIds', arrayContains: fu.uid)
+            .orderBy('lastUpdated', descending: true);
 
     return collection.snapshots().asyncMap(
           (query) => processRoomsQuery(
@@ -313,7 +314,8 @@ class FirebaseChatCore {
   /// Sends a message to the Firestore. Accepts any partial message and a
   /// room ID. If arbitraty data is provided in the [partialMessage]
   /// does nothing.
-  void sendMessage(dynamic partialMessage, String roomId, Map<String, dynamic>? statusMap) async {
+  void sendMessage(dynamic partialMessage, String roomId,
+      Map<String, dynamic>? statusMap) async {
     if (firebaseUser == null) return;
 
     types.Message? message;
@@ -440,7 +442,7 @@ class FirebaseChatCore {
               data['lastSeen'] = data['lastSeen']?.millisecondsSinceEpoch;
               data['updatedAt'] = data['updatedAt']?.millisecondsSinceEpoch;
 
-              return [...previousValue, types.User.fromJson(data)];
+              return [...previousValue, processUserDocument(data)];
             },
           ),
         );
